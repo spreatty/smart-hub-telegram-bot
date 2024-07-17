@@ -1,0 +1,6 @@
+{
+    "botToken": "",
+    "botPort": 8443,
+    "usernameWhitelist": [""],
+    "localPort": 8101
+}

@@ -1,0 +1,19 @@
+{
+  "name": "smart-hub-telegram-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "config": {
+    "host": "127.0.0.1"
+  },
+  "scripts": {
+    "start": "node main.js",
+    "cert": "openssl req -newkey rsa:2048 -sha256 -nodes -keyout ssl/bot-key.key -x509 -days 365 -out ssl/bot-cert.pem -subj \"/CN=%npm_package_config_host%\""
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "telegraf": "^4.16.3"
+  }
+}
