@@ -10,7 +10,18 @@ const sslKey = fs.readFileSync('ssl/bot-key.key');
 const sslCert = fs.readFileSync('ssl/bot-cert.pem');
 const bot = new Telegraf(config.botToken);
 const path = '/telegraf/' + bot.secretPathComponent();
-const webhookUrl = 'https://' + host + ':' + config.port + path;
+const webhookUrl = 'https://' + host + ':' + config.botPort + path;
+
+const acMsgMap = {
+    'off': 'Кондиціонер вимкнено',
+    'on': 'Кондиціонер увімкнено',
+    'requested': 'Запуск кондиціонера заплановано'
+};
+const powerMsgMap = {
+    'off': 'Живлення відсутнє',
+    'backup': 'Живлення резервне',
+    'on': 'Живлення державне'
+};
 
 const storageFile = 'storage.json';
 let storage = { subscribedChats: [] };
@@ -34,6 +45,10 @@ const saveStorage = () => {
         log('Failed to save storage', e);
     }
 };
+
+const broadcast = msg => {
+    storage.subscribedChats.forEach(id => bot.telegram.sendMessage(id, msg));
+}
 
 bot.command('start', ctx => {
     const chat = ctx.update.message.chat.id;
@@ -66,10 +81,16 @@ bot.command('acoff', ctx => {
     const localApp = express();
     localApp.post('/ac', express.json(), (req, res) => {
         log('AC update', req.body);
+        const msg = acMsgMap[req.body.status];
+        if (msg)
+            broadcast(msg);
         res.sendStatus(201);
     });
     localApp.post('/power', express.json(), (req, res) => {
         log('Power update', req.body);
+        const msg = powerMsgMap[req.body.status];
+        if (msg)
+            broadcast(msg);
         res.sendStatus(201);
     });
     await new Promise((resolve, reject) => {
@@ -88,12 +109,12 @@ bot.command('acoff', ctx => {
     app.post(path, bot.webhookCallback(path));
     await new Promise((resolve, reject) => {
         try {
-            https.createServer({ key: sslKey, cert: sslCert }, app).listen(config.port, resolve);
+            https.createServer({ key: sslKey, cert: sslCert }, app).listen(config.botPort, resolve);
         } catch(e) {
             reject(e);
         }
     });
-    log('Bot server ready', config.port);
+    log('Bot server ready', config.botPort);
     await bot.telegram.setWebhook(webhookUrl, { certificate: { source: sslCert } });
     log('Bot set webhook', webhookUrl);
-});
+})();
