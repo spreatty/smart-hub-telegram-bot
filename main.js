@@ -119,6 +119,12 @@ bot.command('powbackup', async ctx => {
         ctx.sendMessage(powerOverrideErrorMsg);
 });
 
+bot.command('powoff', async ctx => {
+    const ok = await powerOverride('off');
+    if (!ok)
+        ctx.sendMessage(powerOverrideErrorMsg);
+});
+
 (async () => {
     const localApp = express();
     localApp.post('/ac', express.json(), (req, res) => {
