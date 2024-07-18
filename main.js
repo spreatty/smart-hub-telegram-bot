@@ -84,14 +84,14 @@ const acAction = async url => {
     }
 };
 
-bot.command('ac-on', async ctx => {
+bot.command('acon', async ctx => {
     const status = await acAction(config.acOnUrl);
     const msg = acActionMsgMap[status];
     if (msg)
         ctx.sendMessage(msg);
 });
 
-bot.command('ac-off', async ctx => {
+bot.command('acoff', async ctx => {
     const status = await acAction(config.acOffUrl);
     const msg = acActionMsgMap[status];
     if (msg)
@@ -107,13 +107,13 @@ const powerOverride = async power => {
     }
 };
 
-bot.command('pow-main', async ctx => {
+bot.command('powmain', async ctx => {
     const ok = await powerOverride('main');
     if (!ok)
         ctx.sendMessage(powerOverrideErrorMsg);
 });
 
-bot.command('pow-backup', async ctx => {
+bot.command('powbackup', async ctx => {
     const ok = await powerOverride('backup');
     if (!ok)
         ctx.sendMessage(powerOverrideErrorMsg);
