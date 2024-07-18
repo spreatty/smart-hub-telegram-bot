@@ -3,6 +3,7 @@ const fs = require('fs');
 const express = require('express');
 const { Telegraf } = require('telegraf');
 const config = require('./config.json');
+const { default: axios } = require('axios');
 const host = require('./package.json').config.host;
 const log = (...args) => console.log(new Date().toLocaleString(), ...args);
 
@@ -22,6 +23,11 @@ const powerMsgMap = {
     'backup': '💡 Живлення резервне',
     'main': '⚡️ Живлення державне'
 };
+const acActionMsgMap = {
+    'already': 'ℹ️ Кондиціонер вже є у вибраному стані',
+    'fail': '❌ Не вдалось перемкнути кондиціонер'
+};
+const powerOverrideErrorMsg = '❌ Не вдалось записати новий статус мережі живлення';
 
 const storageFile = 'storage.json';
 let storage = { subscribedChats: [] };
@@ -69,12 +75,48 @@ bot.command('stop', ctx => {
     }
 });
 
-bot.command('acon', ctx => {
-    
+const acAction = async url => {
+    try {
+        const res = await axios.post(url);
+        return res.data.status;
+    } catch(e) {
+        return null;
+    }
+};
+
+bot.command('ac-on', async ctx => {
+    const status = await acAction(config.acOnUrl);
+    const msg = acActionMsgMap[status];
+    if (msg)
+        ctx.sendMessage(msg);
 });
 
-bot.command('acoff', ctx => {
-    
+bot.command('ac-off', async ctx => {
+    const status = await acAction(config.acOffUrl);
+    const msg = acActionMsgMap[status];
+    if (msg)
+        ctx.sendMessage(msg);
+});
+
+const powerOverride = async power => {
+    try {
+        await axios.post(config.correctPowerUrl, { power });
+        return true;
+    } catch(e) {
+        return false;
+    }
+};
+
+bot.command('pow-main', async ctx => {
+    const ok = await powerOverride('main');
+    if (!ok)
+        ctx.sendMessage(powerOverrideErrorMsg);
+});
+
+bot.command('pow-backup', async ctx => {
+    const ok = await powerOverride('backup');
+    if (!ok)
+        ctx.sendMessage(powerOverrideErrorMsg);
 });
 
 (async () => {

@@ -2,5 +2,8 @@
     "botToken": "",
     "botPort": 8443,
     "usernameWhitelist": [""],
-    "localPort": 8101
+    "localPort": 8101,
+    "acOnUrl": "http://127.0.0.1:8100/on",
+    "acOffUrl": "http://127.0.0.1:8100/off",
+    "correctPowerUrl": "http://127.0.0.1:8089/correct"
 }
